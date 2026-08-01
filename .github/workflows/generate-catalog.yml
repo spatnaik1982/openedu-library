@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 concurrency:
   group: catalog-generation
@@ -27,10 +28,23 @@ jobs:
           REPO: ${{ github.repository }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npx --no-install open-edu-registry generate-catalog --repo "$REPO" --out catalog.json --strict
-      - name: Commit regenerated catalog
+      - name: Open PR for regenerated catalog
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git checkout -B chore/catalog-regeneration origin/main
           git add catalog.json
-          git diff --cached --quiet || git commit -m "chore(catalog): regenerate catalog.json"
-          git push origin HEAD:${{ github.event.release.target_commitish || 'main' }}
+          if git diff --cached --quiet; then
+            echo "catalog.json unchanged; nothing to do"
+            exit 0
+          fi
+          git commit -m "chore(catalog): regenerate catalog.json"
+          git push -u --force origin chore/catalog-regeneration
+          gh pr create \
+            --base main \
+            --head chore/catalog-regeneration \
+            --title "chore(catalog): regenerate catalog.json" \
+            --body "Regenerated automatically by the Generate Catalog workflow." || true
