@@ -1,0 +1,17 @@
+{
+  "name": "openedu-library",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "validate:metadata": "open-edu-registry validate-metadata",
+    "validate:catalog": "open-edu-registry validate-catalog catalog.json",
+    "generate:catalog": "open-edu-registry generate-catalog --repo \"$GITHUB_REPOSITORY\" --out catalog.json",
+    "validate:release": "open-edu-registry validate-release --repo \"$GITHUB_REPOSITORY\" --tag \"$GITHUB_REF_NAME\"",
+    "generate:schemas": "open-edu-registry generate-schemas --out schemas"
+  },
+  "devDependencies": {
+    "@open-edu/registry": "^0.1.0"
+  }
+}

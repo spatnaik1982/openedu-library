@@ -1,0 +1,80 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[a-z0-9][a-z0-9_-]*$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 4096
+    },
+    "author": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Informational only; catalog versions always come from GitHub Releases"
+    },
+    "license": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "languages": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 16
+      },
+      "minItems": 1
+    },
+    "thumbnail": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_./-]+\\.(webp|png|jpg|jpeg|avif)$"
+    },
+    "screenshots": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 64
+      }
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "course",
+        "bundle"
+      ],
+      "default": "course"
+    }
+  },
+  "required": [
+    "id",
+    "name",
+    "author",
+    "license",
+    "languages"
+  ],
+  "additionalProperties": false,
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://openedu.dev/schemas/metadata.schema.json"
+}

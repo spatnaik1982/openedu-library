@@ -1,0 +1,111 @@
+{
+  "type": "object",
+  "properties": {
+    "catalogVersion": {
+      "type": "number",
+      "const": 1
+    },
+    "generatedAt": {
+      "type": "string"
+    },
+    "packages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "pattern": "^[a-z0-9][a-z0-9_-]*$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "description": {
+            "type": "string"
+          },
+          "author": {
+            "type": "string"
+          },
+          "license": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "thumbnail": {
+            "type": "string",
+            "format": "uri"
+          },
+          "latestVersion": {
+            "type": "string"
+          },
+          "versions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "version": {
+                  "type": "string",
+                  "pattern": "^\\d+\\.\\d+\\.\\d+$"
+                },
+                "downloadUrl": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "checksum": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "sizeBytes": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0
+                },
+                "languages": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "default": [
+                    "en"
+                  ]
+                },
+                "createdAt": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "version",
+                "downloadUrl",
+                "checksum",
+                "sizeBytes"
+              ],
+              "additionalProperties": false
+            },
+            "minItems": 1
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "latestVersion",
+          "versions"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "catalogVersion",
+    "packages"
+  ],
+  "additionalProperties": false,
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://openedu.dev/schemas/catalog.schema.json"
+}
