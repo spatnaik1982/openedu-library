@@ -1,5 +1,30 @@
 {
   "catalogVersion": 1,
-  "generatedAt": "2026-08-01T08:14:16.488Z",
-  "packages": []
+  "generatedAt": "2026-08-01T17:53:34.446Z",
+  "packages": [
+    {
+      "id": "the-magic-of-the-indian-monsoon",
+      "title": "The Magic of the Indian Monsoon! 🌧️",
+      "description": "How the Indian monsoon works, its seasons, and its impact.",
+      "author": "OpenEdu Course Creator",
+      "license": "CC-BY-SA-4.0",
+      "tags": [
+        "monsoon",
+        "india",
+        "climate"
+      ],
+      "latestVersion": "1.0.0",
+      "versions": [
+        {
+          "version": "1.0.0",
+          "downloadUrl": "https://github.com/spatnaik1982/openedu-library/releases/download/the-magic-of-the-indian-monsoon-v1.0.0/the-magic-of-the-indian-monsoon-1.0.0.oep",
+          "checksum": "88161c453803613b3a6eca8f20c0e5a6d8447d0ff64d2a271b533a13f00477e1",
+          "sizeBytes": 7467,
+          "languages": [
+            "en"
+          ]
+        }
+      ]
+    }
+  ]
 }
