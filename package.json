@@ -12,6 +12,7 @@
     "generate:schemas": "open-edu-registry generate-schemas --out schemas"
   },
   "devDependencies": {
-    "@open-edu/registry": "^0.1.0"
+    "@open-edu/registry": "^0.1.0",
+    "react": "^18.0.0"
   }
 }
