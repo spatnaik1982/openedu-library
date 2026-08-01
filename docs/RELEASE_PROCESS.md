@@ -37,7 +37,7 @@ flowchart TD
     D -->|no| X5[FAIL]
     D -->|yes| I{OepReader validates manifest?}
     I -->|no| X6[FAIL]
-    I -->|yes| OK[Release is valid → catalog regenerates]
+    I -->|yes| OK[Release is valid → maintainer regenerates catalog]
 ```
 
 `release-validate.yml` runs `open-edu-registry validate-release`, which:
@@ -60,4 +60,5 @@ flowchart TD
 ## Deprecation
 
 Removing a course: delete its releases and its `courses/<id>/` directory in a PR.
-The next catalog regeneration omits it.
+The next catalog regeneration omits it (see the
+[Publishing Guide](PUBLISHING_GUIDE.md#step-4--regenerate-the-catalog)).

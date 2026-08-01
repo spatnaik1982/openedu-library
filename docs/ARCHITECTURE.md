@@ -38,7 +38,7 @@ sequenceDiagram
     A->>GH: edu oep:build → release <id>-v<ver>
     GH->>CI: release published
     CI->>GH: release-validate.yml (checksums, OepReader)
-    CI->>R: generate-catalog.yml (rewrites catalog.json)
+    A->>R: regenerate catalog.json (manual, PR)
     CI->>P: deploy-pages.yml
     L->>P: GET catalog.json (VITE_CATALOG_URL)
     L->>GH: download .oep (checksum enforced on install)
@@ -69,7 +69,7 @@ The `open-edu-registry` CLI (from `@open-edu/registry`) exposes:
 | --- | --- | --- |
 | `validate-metadata` | Schema-validate all `courses/*/metadata.json`, check unique ids | `validate.yml` |
 | `validate-catalog` | Validate `catalog.json` against `CatalogSchema` + ordering rules | `validate.yml` |
-| `generate-catalog` | Merge metadata + GitHub Releases into `catalog.json` | `generate-catalog.yml` |
+| `generate-catalog` | Merge metadata + GitHub Releases into `catalog.json` | maintainers (manual, PR) |
 | `validate-release` | Verify a release's tag, metadata, assets, checksums, and OEP manifest | `release-validate.yml` |
 | `generate-schemas` | Emit `schemas/*.json` from the Zod schemas | maintainers |
 

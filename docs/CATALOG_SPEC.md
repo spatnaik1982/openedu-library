@@ -2,9 +2,9 @@
 
 `catalog.json` is the machine-readable catalog that the OpenEdu learner app
 fetches at runtime. It is **generated** by the `open-edu-registry generate-catalog`
-command and must **never be hand-edited** — the `generate-catalog` GitHub Actions
-workflow regenerates it from `courses/*/metadata.json` + GitHub Releases on every
-release, and `validate:catalog` checks it in CI.
+command and must **never be hand-edited**. Maintainers regenerate it locally from
+`courses/*/metadata.json` + GitHub Releases after each release, and
+`validate:catalog` checks it in CI.
 
 ## Shape
 
@@ -60,8 +60,9 @@ Run locally:
 npm run validate:catalog
 ```
 
-`validate.yml` runs this on every push/PR. The catalog is regenerated only when a
-release is published (`generate-catalog.yml`).
+`validate.yml` runs this on every push/PR. The catalog is regenerated **manually**
+after a release is published — run the `generate-catalog` command locally and open
+a PR (see the [Publishing Guide](PUBLISHING_GUIDE.md#step-4--regenerate-the-catalog)).
 
 ## Schema
 

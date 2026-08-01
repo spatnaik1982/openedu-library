@@ -13,7 +13,7 @@ actual course packages (`.oep` files) live in [GitHub Releases](https://github.c
 | `courses/<id>/thumbnail.png` | **authored** | Optional thumbnail (referenced from `metadata.json`) |
 | `catalog.json` | **generated** | The machine-readable catalog consumed by the learner app. Never hand-edit. |
 | `schemas/*.json` | **generated** | JSON Schema files regenerated from `@open-edu/schemas`. Never hand-edit. |
-| `.github/workflows/*.yml` | **authored** | CI: validate metadata, validate release assets, regenerate the catalog, deploy Pages |
+| `.github/workflows/*.yml` | **authored** | CI: validate metadata, validate release assets, deploy Pages (catalog is regenerated manually) |
 
 ## How the learner app finds courses
 

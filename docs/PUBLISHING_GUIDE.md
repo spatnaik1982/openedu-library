@@ -1,8 +1,9 @@
 # Publishing Guide
 
-Publishing a course to the OpenEdu Library is a three-step process. Everything is
-automated after that: metadata is validated on PR, release assets are validated on
-publish, and the catalog + Pages site regenerate automatically.
+Publishing a course to the OpenEdu Library is a four-step process. Metadata is
+validated on PR, release assets are validated on publish, and the Pages site
+deploys automatically — but the catalog is regenerated **manually** (see
+[Step 4](#step-4--regenerate-the-catalog)).
 
 ```mermaid
 flowchart LR
@@ -11,8 +12,8 @@ flowchart LR
     C --> D[Author: build .oep with edu oep:build]
     D --> E[Author: gh release create &lt;id&gt;-v&lt;semver&gt;]
     E --> F[release-validate.yml]
-    F -->|pass| G[generate-catalog.yml]
-    G --> H[catalog.json updated on main]
+    F -->|pass| G[Author: regenerate catalog.json]
+    G -->|PR| H[catalog.json merged to main]
     H --> I[deploy-pages.yml]
     I --> J[GitHub Pages catalog.json]
     J --> K[Learner app fetches via VITE_CATALOG_URL]
@@ -57,9 +58,33 @@ gh release create my-course-v1.2.0 \
   --title "my-course v1.2.0"
 ```
 
-On publish, `release-validate.yml` verifies the assets (see the
-[Release Process](RELEASE_PROCESS.md)), then `generate-catalog.yml` regenerates
-`catalog.json` and `deploy-pages.yml` publishes it.
+## Step 4 — Regenerate the catalog
+
+After the release is validated (by `release-validate.yml`; see the
+[Release Process](RELEASE_PROCESS.md)), regenerate `catalog.json` **locally** and
+open a PR (the `main` branch requires changes via PR).
+
+```bash
+# requires a token; the repo is private
+GITHUB_TOKEN=<token> npm run generate:catalog
+# or: GITHUB_TOKEN=<token> npx --no-install open-edu-registry generate-catalog \
+#       --repo <owner>/openedu-library --out catalog.json --strict
+```
+
+`npm run generate:catalog` uses `$GITHUB_REPOSITORY` (set in CI); locally, pass
+the repo explicitly or set `GITHUB_REPOSITORY=<owner>/openedu-library`. Pre-release
+releases are skipped by default — pass `--include-prerelease` to include them.
+
+```bash
+git checkout -b chore/catalog-regeneration
+git add catalog.json
+git commit -m "chore(catalog): regenerate catalog.json"
+git push origin chore/catalog-regeneration
+gh pr create --base main --head chore/catalog-regeneration \
+  --title "chore(catalog): regenerate catalog.json"
+```
+
+Once merged, `deploy-pages.yml` publishes the updated catalog.
 
 ## Rules to remember
 
