@@ -89,6 +89,41 @@
         padding: 0.25rem 0.75rem;
         font-size: 0.85rem;
       }
+      .catalog-box {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        margin-top: 1.25rem;
+      }
+      .catalog-label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 0.4rem;
+      }
+      .catalog-label small { color: var(--muted); font-weight: 400; }
+      .catalog-row { display: flex; gap: 0.5rem; }
+      .catalog-row input {
+        flex: 1;
+        min-width: 0;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.85rem;
+        padding: 0.4rem 0.6rem;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: var(--code-bg);
+        color: var(--fg);
+      }
+      .catalog-row button {
+        border: 1px solid var(--border);
+        background: var(--code-bg);
+        color: var(--fg);
+        border-radius: 6px;
+        padding: 0.4rem 0.9rem;
+        font-size: 0.85rem;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+      .catalog-row button:hover { border-color: var(--accent); color: var(--accent); }
       a { color: var(--accent); text-decoration: none; }
       a:hover { text-decoration: underline; }
       .docs-layout {
@@ -165,6 +200,16 @@
         Browse the catalog at <code>catalog.json</code> and download <code>.oep</code> packages from GitHub Releases.
       </p>
 
+      <div class="catalog-box">
+        <div class="catalog-label">
+          Catalog URL <small>paste this into the OpenEdu app</small>
+        </div>
+        <div class="catalog-row">
+          <input id="catalog-url" type="text" readonly aria-label="Catalog URL" />
+          <button id="copy-catalog" type="button">Copy</button>
+        </div>
+      </div>
+
       <section>
         <h2>Courses</h2>
         <p class="lead">Click a course to view its GitHub release.</p>
@@ -193,6 +238,30 @@
     <script>
       const REPO = "knowledgeassembly/openedu-library";
       const GITHUB_ROOT = "https://github.com/" + REPO;
+
+      const urlInput = document.getElementById("catalog-url");
+      const copyBtn = document.getElementById("copy-catalog");
+      const basePath = location.pathname.endsWith("/")
+        ? location.pathname
+        : location.pathname + "/";
+      urlInput.value = location.origin + basePath + "catalog.json";
+
+      copyBtn.addEventListener("click", () => {
+        const done = () => {
+          copyBtn.textContent = "Copied!";
+          setTimeout(() => (copyBtn.textContent = "Copy"), 2000);
+        };
+        const fallback = () => {
+          urlInput.select();
+          document.execCommand("copy");
+          done();
+        };
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(urlInput.value).then(done).catch(fallback);
+        } else {
+          fallback();
+        }
+      });
 
       const DOCS = [
         "COURSE_REGISTRY.md",
