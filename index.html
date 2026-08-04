@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OpenEdu Library</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #ffffff;
+        --fg: #1f2328;
+        --muted: #59636e;
+        --border: #d1d9e0;
+        --accent: #0969da;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0d1117;
+          --fg: #e6edf3;
+          --muted: #9198a1;
+          --border: #3d444d;
+          --accent: #4493f8;
+        }
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+        line-height: 1.5;
+        background: var(--bg);
+        color: var(--fg);
+      }
+      main {
+        max-width: 880px;
+        margin: 0 auto;
+        padding: 2rem 1.25rem 4rem;
+      }
+      h1 { margin-top: 0; }
+      p.lead { color: var(--muted); }
+      section { margin-top: 2.5rem; }
+      h2 {
+        font-size: 1.1rem;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 0.4rem;
+      }
+      .card {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 1rem 1.25rem;
+        margin-bottom: 0.75rem;
+      }
+      .card h3 { margin: 0 0 0.25rem; }
+      .card p { margin: 0.25rem 0; color: var(--muted); }
+      .meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        margin-top: 0.5rem;
+      }
+      .tag {
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 0.1rem 0.6rem;
+        font-size: 0.75rem;
+        color: var(--muted);
+      }
+      a { color: var(--accent); text-decoration: none; }
+      a:hover { text-decoration: underline; }
+      ul.docs { list-style: none; padding: 0; }
+      ul.docs li { margin-bottom: 0.5rem; }
+      .error { color: #cf222e; border: 1px solid #cf222e; border-radius: 8px; padding: 1rem; }
+      footer { margin-top: 3rem; color: var(--muted); font-size: 0.85rem; }
+      code { background: var(--border); border-radius: 4px; padding: 0.1rem 0.35rem; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>OpenEdu Library</h1>
+      <p class="lead">
+        Official course registry for OpenEdu &mdash; a GitHub-native, backend-free package registry.
+        Browse the catalog at <code>catalog.json</code> and download <code>.oep</code> packages from GitHub Releases.
+      </p>
+
+      <section>
+        <h2>Courses</h2>
+        <div id="courses"><p>Loading catalog&hellip;</p></div>
+      </section>
+
+      <section>
+        <h2>Documentation</h2>
+        <ul class="docs" id="docs"></ul>
+      </section>
+
+      <footer>
+        <p>
+          Browse the source at
+          <a href="https://github.com/knowledgeassembly/openedu-library">github.com/knowledgeassembly/openedu-library</a>
+        </p>
+      </footer>
+    </main>
+
+    <script>
+      const docs = [
+        "COURSE_REGISTRY.md",
+        "CATALOG_SPEC.md",
+        "METADATA_SPEC.md",
+        "PUBLISHING_GUIDE.md",
+        "RELEASE_PROCESS.md",
+        "ARCHITECTURE.md",
+      ];
+      const docsEl = document.getElementById("docs");
+      docs.forEach((f) => {
+        const li = document.createElement("li");
+        const a = document.createElement("a");
+        a.href = "docs/" + f;
+        a.textContent = f.replace(/\.md$/, "").replace(/_/g, " ");
+        li.appendChild(a);
+        docsEl.appendChild(li);
+      });
+
+      const coursesEl = document.getElementById("courses");
+      fetch("catalog.json")
+        .then((r) => {
+          if (!r.ok) throw new Error("catalog.json not found");
+          return r.json();
+        })
+        .then((catalog) => {
+          const packages = (catalog && catalog.packages) || [];
+          if (!packages.length) {
+            coursesEl.innerHTML = "<p>No courses in the catalog yet.</p>";
+            return;
+          }
+          coursesEl.innerHTML = "";
+          packages.forEach((p) => {
+            const card = document.createElement("div");
+            card.className = "card";
+
+            const h3 = document.createElement("h3");
+            const link = document.createElement("a");
+            const courseDir = "courses/" + p.id;
+            const readmeUrl = courseDir + "/README.md";
+            fetch(readmeUrl, { method: "HEAD" }).then(
+              (r) => {
+                if (r.ok) {
+                  link.href = readmeUrl;
+                } else {
+                  link.href =
+                    "https://github.com/knowledgeassembly/openedu-library/tree/main/" +
+                    courseDir;
+                }
+              },
+              () => {
+                link.href =
+                  "https://github.com/knowledgeassembly/openedu-library/tree/main/" +
+                  courseDir;
+              },
+            );
+            link.textContent = p.title || p.id;
+            h3.appendChild(link);
+            card.appendChild(h3);
+
+            if (p.description) {
+              const desc = document.createElement("p");
+              desc.textContent = p.description;
+              card.appendChild(desc);
+            }
+
+            const meta = document.createElement("div");
+            meta.className = "meta";
+            if (p.latestVersion) {
+              const tag = document.createElement("span");
+              tag.className = "tag";
+              tag.textContent = "v" + p.latestVersion;
+              meta.appendChild(tag);
+            }
+            (p.tags || []).forEach((t) => {
+              const tag = document.createElement("span");
+              tag.className = "tag";
+              tag.textContent = t;
+              meta.appendChild(tag);
+            });
+            if (p.license) {
+              const tag = document.createElement("span");
+              tag.className = "tag";
+              tag.textContent = p.license;
+              meta.appendChild(tag);
+            }
+            card.appendChild(meta);
+
+            coursesEl.appendChild(card);
+          });
+        })
+        .catch((err) => {
+          coursesEl.innerHTML =
+            '<div class="error">Could not load catalog.json: ' + err.message + "</div>";
+        });
+    </script>
+  </body>
+</html>
