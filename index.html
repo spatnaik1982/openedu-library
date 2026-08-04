@@ -12,6 +12,8 @@
         --muted: #59636e;
         --border: #d1d9e0;
         --accent: #0969da;
+        --accent-soft: #ddf4ff;
+        --code-bg: #f6f8fa;
       }
       @media (prefers-color-scheme: dark) {
         :root {
@@ -20,6 +22,8 @@
           --muted: #9198a1;
           --border: #3d444d;
           --accent: #4493f8;
+          --accent-soft: #1f3d54;
+          --code-bg: #161b22;
         }
       }
       * { box-sizing: border-box; }
@@ -31,7 +35,7 @@
         color: var(--fg);
       }
       main {
-        max-width: 880px;
+        max-width: 960px;
         margin: 0 auto;
         padding: 2rem 1.25rem 4rem;
       }
@@ -48,9 +52,22 @@
         border-radius: 8px;
         padding: 1rem 1.25rem;
         margin-bottom: 0.75rem;
+        cursor: pointer;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      }
+      .card:hover {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-soft);
       }
       .card h3 { margin: 0 0 0.25rem; }
       .card p { margin: 0.25rem 0; color: var(--muted); }
+      .card .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        align-items: center;
+        margin-top: 0.75rem;
+      }
       .meta {
         display: flex;
         flex-wrap: wrap;
@@ -64,10 +81,77 @@
         font-size: 0.75rem;
         color: var(--muted);
       }
+      .btn {
+        display: inline-block;
+        border: 1px solid var(--accent);
+        color: var(--accent);
+        border-radius: 6px;
+        padding: 0.25rem 0.75rem;
+        font-size: 0.85rem;
+      }
       a { color: var(--accent); text-decoration: none; }
       a:hover { text-decoration: underline; }
-      ul.docs { list-style: none; padding: 0; }
-      ul.docs li { margin-bottom: 0.5rem; }
+      .docs-layout {
+        display: grid;
+        grid-template-columns: 240px 1fr;
+        gap: 1.5rem;
+        align-items: start;
+      }
+      @media (max-width: 720px) {
+        .docs-layout { grid-template-columns: 1fr; }
+      }
+      .docs-nav { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+      .docs-nav button {
+        display: block;
+        width: 100%;
+        text-align: left;
+        background: none;
+        border: none;
+        border-bottom: 1px solid var(--border);
+        padding: 0.6rem 0.9rem;
+        font-size: 0.9rem;
+        color: var(--fg);
+        cursor: pointer;
+      }
+      .docs-nav button:last-child { border-bottom: none; }
+      .docs-nav button:hover { background: var(--accent-soft); }
+      .docs-nav button.active {
+        background: var(--accent-soft);
+        color: var(--accent);
+        font-weight: 600;
+      }
+      .docs-content {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 1.25rem 1.5rem;
+        min-height: 300px;
+        overflow-x: auto;
+      }
+      .docs-content .placeholder { color: var(--muted); }
+      .docs-content h1 { border-bottom: 1px solid var(--border); padding-bottom: 0.3em; }
+      .docs-content h2 { border-bottom: 1px solid var(--border); padding-bottom: 0.3em; margin-top: 1.4em; }
+      .docs-content pre {
+        background: var(--code-bg);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 0.75rem 1rem;
+        overflow-x: auto;
+      }
+      .docs-content code {
+        background: var(--code-bg);
+        border-radius: 4px;
+        padding: 0.1rem 0.35rem;
+        font-size: 0.9em;
+      }
+      .docs-content pre code { background: none; padding: 0; }
+      .docs-content table { border-collapse: collapse; width: 100%; }
+      .docs-content th, .docs-content td {
+        border: 1px solid var(--border);
+        padding: 0.4rem 0.7rem;
+        text-align: left;
+      }
+      .docs-content th { background: var(--code-bg); }
+      .docs-content img { max-width: 100%; }
       .error { color: #cf222e; border: 1px solid #cf222e; border-radius: 8px; padding: 1rem; }
       footer { margin-top: 3rem; color: var(--muted); font-size: 0.85rem; }
       code { background: var(--border); border-radius: 4px; padding: 0.1rem 0.35rem; }
@@ -83,12 +167,18 @@
 
       <section>
         <h2>Courses</h2>
+        <p class="lead">Click a course to view its GitHub release.</p>
         <div id="courses"><p>Loading catalog&hellip;</p></div>
       </section>
 
       <section>
         <h2>Documentation</h2>
-        <ul class="docs" id="docs"></ul>
+        <div class="docs-layout">
+          <nav class="docs-nav" id="docs-nav" aria-label="Documentation"></nav>
+          <article class="docs-content" id="docs-content">
+            <p class="placeholder">Select a document to view it here.</p>
+          </article>
+        </div>
       </section>
 
       <footer>
@@ -99,8 +189,12 @@
       </footer>
     </main>
 
+    <script src="https://cdn.jsdelivr.net/npm/marked@15/marked.min.js"></script>
     <script>
-      const docs = [
+      const REPO = "knowledgeassembly/openedu-library";
+      const GITHUB_ROOT = "https://github.com/" + REPO;
+
+      const DOCS = [
         "COURSE_REGISTRY.md",
         "CATALOG_SPEC.md",
         "METADATA_SPEC.md",
@@ -108,15 +202,56 @@
         "RELEASE_PROCESS.md",
         "ARCHITECTURE.md",
       ];
-      const docsEl = document.getElementById("docs");
-      docs.forEach((f) => {
-        const li = document.createElement("li");
-        const a = document.createElement("a");
-        a.href = "docs/" + f;
-        a.textContent = f.replace(/\.md$/, "").replace(/_/g, " ");
-        li.appendChild(a);
-        docsEl.appendChild(li);
+
+      const nav = document.getElementById("docs-nav");
+      const content = document.getElementById("docs-content");
+
+      function renderMd(mdText) {
+        if (typeof marked !== "undefined") return marked.parse(mdText);
+        return "<pre>" + mdText.replace(/&/g, "&amp;").replace(/</g, "&lt;") + "</pre>";
+      }
+
+      function loadDoc(name) {
+        fetch("docs/" + name)
+          .then((r) => {
+            if (!r.ok) throw new Error(name + " not found");
+            return r.text();
+          })
+          .then((mdText) => {
+            content.innerHTML = renderMd(mdText);
+            nav.querySelectorAll("button").forEach((b) => {
+              b.classList.toggle("active", b.dataset.doc === name);
+            });
+          })
+          .catch((err) => {
+            content.innerHTML = '<div class="error">Could not load ' + err.message + "</div>";
+          });
+      }
+
+      DOCS.forEach((name) => {
+        const btn = document.createElement("button");
+        btn.dataset.doc = name;
+        btn.textContent = name.replace(/\.md$/, "").replace(/_/g, " ");
+        btn.addEventListener("click", () => loadDoc(name));
+        nav.appendChild(btn);
       });
+
+      content.addEventListener("click", (e) => {
+        const a = e.target.closest("a");
+        if (!a) return;
+        const href = a.getAttribute("href") || "";
+        if (href.endsWith(".md")) {
+          e.preventDefault();
+          loadDoc(href.split("/").pop());
+        }
+      });
+
+      function getReleaseUrl(pkg) {
+        const first = pkg.versions && pkg.versions[0];
+        if (!first || !first.downloadUrl) return null;
+        const m = first.downloadUrl.match(/releases\/download\/([^/]+)\//);
+        return m ? GITHUB_ROOT + "/releases/tag/" + m[1] : null;
+      }
 
       const coursesEl = document.getElementById("courses");
       fetch("catalog.json")
@@ -144,15 +279,11 @@
                 if (r.ok) {
                   link.href = readmeUrl;
                 } else {
-                  link.href =
-                    "https://github.com/knowledgeassembly/openedu-library/tree/main/" +
-                    courseDir;
+                  link.href = GITHUB_ROOT + "/tree/main/" + courseDir;
                 }
               },
               () => {
-                link.href =
-                  "https://github.com/knowledgeassembly/openedu-library/tree/main/" +
-                  courseDir;
+                link.href = GITHUB_ROOT + "/tree/main/" + courseDir;
               },
             );
             link.textContent = p.title || p.id;
@@ -186,6 +317,23 @@
               meta.appendChild(tag);
             }
             card.appendChild(meta);
+
+            const releaseUrl = getReleaseUrl(p);
+            if (releaseUrl) {
+              const actions = document.createElement("div");
+              actions.className = "actions";
+              const rel = document.createElement("a");
+              rel.className = "btn";
+              rel.href = releaseUrl;
+              rel.textContent = "View release";
+              actions.appendChild(rel);
+              card.appendChild(actions);
+
+              card.addEventListener("click", (e) => {
+                if (e.target.closest("a")) return;
+                window.location.href = releaseUrl;
+              });
+            }
 
             coursesEl.appendChild(card);
           });
